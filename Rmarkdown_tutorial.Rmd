@@ -2,7 +2,9 @@
 title: "Rmarkdown_tutorial"
 author: "YG"
 date: "2023-01-23"
-output: html_document
+output: 
+  html_document: 
+    keep_md: yes
 ---
 
 ```{r setup, include=FALSE}
