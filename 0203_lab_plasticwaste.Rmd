@@ -48,20 +48,18 @@ Did you expect this result? You might consider doing some research on Trinidad a
 
 1.1. Plot, using histograms, the distribution of plastic waste per capita faceted by continent. What can you say about how the continents compare to each other in terms of their plastic waste per capita?
 
-> **NOTE:** From this point onwards, the plots and the output of the code are not displayed in the lab instructions, but you can and should the code and view the results yourself.
-
 Another way of visualizing numerical data is using density plots.
 
-```{r plastic_waste_per_cap-dens}
+```{r plastic_waste_per_cap-dens, eval=TRUE}
 ggplot(data = plastic_waste,
        aes(x = plastic_waste_per_cap)) +
   geom_density() +
   geom_rug()
 ```
 
-And compare distributions across continents by coloring density curves by continent.
+2.1 And compare distributions across continents by coloring density curves by continent.
 
-```{r plastic_waste_per_cap-dens-color}
+```{r plastic_waste_per_cap-dens-color, eval=TRUE}
 ggplot(data = plastic_waste, 
        mapping = aes(x = plastic_waste_per_cap, 
                      color = continent)) +
@@ -70,7 +68,7 @@ ggplot(data = plastic_waste,
 
 The resulting plot may be a little difficult to read, so let's also fill the curves in with colors as well.
 
-```{r plastic_waste_per_cap-dens-color-fill}
+```{r plastic_waste_per_cap-dens-color-fill, eval=TRUE}
 ggplot(data = plastic_waste, 
        mapping = aes(x = plastic_waste_per_cap, 
                      color = continent, 
@@ -78,13 +76,11 @@ ggplot(data = plastic_waste,
   geom_density()
 ```
 
-The overlapping colors make it difficult to tell what's happening with the distributions. The first plotted in continents get covered by continents plotted over them.
-
-We can change the transparency level of the fill color to help with this problem.
+The overlapping colors make it difficult to tell what's happening with the distributions. The first plotted in continents get covered by continents plotted over them.We can change the transparency level of the fill color to help with this problem.
 
 The `alpha` argument takes values between 0 and 1: 0 is completely transparent and 1 is completely opaque. There is no way to tell what value will work best, so you just need to try a few.
 
-```{r plastic_waste_per_cap-dens-color-fill-alpha}
+```{r plastic_waste_per_cap-dens-color-fill-alpha, eval=TRUE}
 ggplot(data = plastic_waste, 
        mapping = aes(x = plastic_waste_per_cap, 
                      color = continent, 
@@ -92,11 +88,15 @@ ggplot(data = plastic_waste,
   geom_density(alpha = 0.5)
 ```
 
-🧶 ✅ ⬆️ *Now is a good time to knit your document and commit and push your changes to GitHub with an appropriate commit message. Make sure to commit and push all changed files so that your Git pane is cleared up afterwards.*
+```{r eval=TRUE}
+library(ggridges)
+ggplot(plastic_waste, aes(x=plastic_waste_per_cap, y=continent, fill=continent)) +
+  geom_density_ridges(alpha=0.5)
+
+```
 
 And yet another way to visualize this relationship is using side-by-side box plots.
-
-```{r plastic_waste_per_cap-box}
+```{r plastic_waste_per_cap-box, eval=TRUE}
 ggplot(data = plastic_waste, 
        mapping = aes(x = continent, 
                      y = plastic_waste_per_cap)) +
@@ -105,21 +105,49 @@ ggplot(data = plastic_waste,
 
 3.1. Convert your side-by-side box plots from the previous task to [violin plots](http://ggplot2.tidyverse.org/reference/geom_violin.html). What do the violin plots reveal that box plots do not? What features are apparent in the box plots but not in the violin plots?
 
-> **Remember:** We use `geom_point()` to make scatterplots.
+```{r eval=TRUE}
+ggplot(plastic_waste, aes(x=continent, y=plastic_waste_per_cap)) +
+  geom_violin()
+```
+
+```{r eval=TRUE}
+ggplot(data = plastic_waste, 
+       mapping = aes(x = continent, 
+                     y = plastic_waste_per_cap)) +
+  geom_violin()+
+  geom_boxplot(width=.3, fill="green") +
+  stat_summary(fun.y=median, geom="point", color="red") 
+```
+
 
 4.1. Visualize the relationship between plastic waste per capita and mismanaged plastic waste per capita using a scatterplot. Describe the relationship.
 
+```{r eval=TRUE}
+ggplot(plastic_waste, aes(x=plastic_waste_per_cap, y=mismanaged_plastic_waste_per_cap)) +
+  geom_point()+
+  coord_flip()
+```
+
 4.2. Color the points in the scatterplot by continent. Does there seem to be any clear distinctions between continents with respect to how plastic waste per capita and mismanaged plastic waste per capita are associated?
+
+```{r eval=TRUE}
+ggplot(plastic_waste, aes(x=plastic_waste_per_cap, y=mismanaged_plastic_waste_per_cap, color=continent)) +
+  geom_point()
+```
+
 
 4.3. Visualize the relationship between plastic waste per capita and total population as well as plastic waste per capita and coastal population. You will need to make two separate plots. Do either of these pairs of variables appear to be more strongly linearly associated?
 
-🧶 ✅ ⬆️ *Now is another good time to knit your document and commit and push your changes to GitHub with an appropriate commit message. Make sure to commit and push all changed files so that your Git pane is cleared up afterwards.*
+```{r eval=TRUE}
+ggplot(plastic_waste, aes(x=total_pop, y=plastic_waste_per_cap)) +
+  geom_point()
+```
+```{r eval=TRUE}
+ggplot(plastic_waste, aes(x=coastal_pop, y=plastic_waste_per_cap)) +
+  geom_point()
+```
 
 ## Wrapping up {.unnumbered}
-
-If you still have some time left, move on to the remaining exercises below.
-
-> **Hint:** The x-axis is a calculated variable. One country with plastic waste per capita over 3 kg/day has been filtered out. And the data are not only represented with points on the plot but also a smooth curve. The term "smooth" should help you [pick which geom to use](https://ggplot2.tidyverse.org/reference/index.html#section-geoms).
 
 5.1. Recreate the following plot, and interpret what you see in context of the data.
 
@@ -140,29 +168,6 @@ plastic_waste %>%
          subtitle = "by continent") +
     theme_minimal()
 ```
-
-🧶 ✅ ⬆️ Knit, *commit, and push your changes to GitHub with an appropriate commit message. Make sure to commit and push all changed files so that your Git pane is cleared up afterwards and review the md document on GitHub to make sure you're happy with the final state of your work.*
-
-Once you're done, check to make sure your latest changes are on GitHub and readable.^[(If previous versions of this lab, there was an automated check to see if for your R Markdown document knitted properly. It required using github actions, which made this lab a tad too complicated.)]
-
-
-### Yoo Ri Tips
-
-<!--
-### Excercise 3
-
-Try this :D
-
-ggplot(data = plastic_waste, 
-       mapping = aes(x = continent, 
-                     y = plastic_waste_per_cap)) +
-  geom_violin()+
-  geom_boxplot(width=.3, fill="green") +
-  stat_summary(fun.y=median, geom="point") 
-
-  -->
-  
-### Exercise 5 
 
 Helpful reference:http://www.sthda.com/english/wiki/ggplot2-themes-and-background-colors-the-3-elements
 
