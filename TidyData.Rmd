@@ -1,0 +1,369 @@
+---
+title: "TidyData"
+author: "YG"
+date: "2023-01-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Tidy data
+1. each variable forms a colum
+2. each observation forms a row
+3. each type of observational unit forms a table
+
+```{r}
+starwars %>%
+  select(name, height, mass)
+```
+
+```{r}
+starwars %>%
+  group_by(gender) %>%
+  summarize(avg_ht=mean(height, na.rm = T))
+```
+
+#Data Structures in R
+
+Matrix: requires all the elements to be of the same type
+Data frame: allows for mixed types of variables
+Tibble: like a data frame, but works more consistently
+
+A grammar of data wrangling
+
+select: pick columns by name
+arrange: reorder rows
+slice: pick rows using indexes
+filter: pick rows matching criteria
+distinct: filter for unique rows
+mutate: add new variables
+summarize: reduce variables to values
+group_by: for grouped operations
+
+#Rules of dplyr
+first argument is always a data frame
+subsequent argument say what to do with that data frame
+always return a data frame
+don't modify in place
+
+##read in data
+```{r}
+h1<-read_csv("H1.csv", show_col_types = FALSE)
+h1<- h1 %>%
+  mutate(hotel="h1")
+h2<-read_csv("H2.csv", show_col_types = FALSE)
+h2<-h2 %>%
+  mutate(hotel="h2")
+hotels<-rbind(h1,h2)
+#names(h1)
+#names(h2)
+```
+
+```{r}
+names(hotels)
+#glimpse(hotels)
+```
+```{r}
+select(hotels, hotel, LeadTime)
+```
+```{r}
+hotels %>%
+  select(hotel, LeadTime) %>%
+  arrange(desc(LeadTime))
+```
+##Pipes
+It is a technique for passing information from one process to another.
+%>% used mainly in dplyr (Cmd+Shift+M)
++ used in ggplots
+code styling (always a space before the pipe sign, and a line break after the pipe sign)
+
+Use the dot to
+1. send results to a function argument other than first one or
+2. use the previous result for multiple arguments
+
+```{r}
+hotels %>%
+  filter(hotel == 'h1') %>%
+  lm(ADR~LeadTime, data=.)
+```
+
+#Introduction to dplyr
+
+##load library
+```{r}
+library(tidyverse)
+library(gapminder)
+```
+
+```{r}
+gapminder
+```
+
+```{r}
+as_tibble(iris)
+```
+###Think before you create exerpts of your data
+
+###use filter() to subset data row-wise
+```{r}
+filter(gapminder, lifeExp<29)
+filter(gapminder, country == "Rwanda", year>1979)
+filter(gapminder, country %in% c("Rwanda","Afghanistan"))
+
+#base R
+gapminder[gapminder$lifeExp<29,]
+subset(gapminder, country =="canada")
+```
+###use select to subset the data on variables or columns
+```{r}
+select(gapminder, year, lifeExp)
+
+gapminder %>% 
+  select(year, lifeExp) %>% 
+  head(4)
+
+#base R
+gapminder[gapminder$country == "Cambodia", c("year", "lifeExp")]
+```
+#hands on data wrangling
+
+###select() examples
+starts_with(): starts with a prefix
+ends_with(): ends with a prefix
+contains(): contains a literal string
+num_range(): matches a numerical range
+one_of(): matches variable names in a character vector
+everything(): matches all variables
+last_col(): select last variable, possibly with an offset
+matches(): matches a regular expression
+
+```{r}
+hotels %>% 
+  select(-hotel) #exclude certain columns
+
+hotels %>% 
+  select(hotel:ArrivalDateMonth) #select a consective columns
+
+hotels %>% 
+  select(starts_with('Arrival')) #select variables with certain characteristics
+  
+hotels %>% 
+  select(ends_with('Arrival')) 
+
+hotels %>% 
+  select(starts_with('Month'))
+
+```
+###arrange() examples
+```{r}
+hotels %>% 
+  select(Adults, Children, Babies) %>% 
+  arrange(Babies)
+
+hotels %>% 
+  select(Adults, Children, Babies) %>% 
+  arrange(desc(Babies))
+```
+
+###slice() examples
+```{r}
+hotels %>% 
+  slice(1:5) #slice for certain row numbers
+
+last_row<-nrow(hotels)
+hotels %>% 
+  slice((last_row-4):last_row) #get the last 5 rows
+```
+
+###filter() examples
+
+```{r}
+hotels %>% 
+  filter(
+    Adults == 0,
+    Children >= 1
+  ) %>% 
+  select(Adults, Children, Babies)
+
+hotels %>% 
+  filter(
+    Adults == 0,
+    Children >= 1 | Babies >1
+  ) %>% 
+  select(Adults, Children, Babies)
+```
+
+###distinct() examples
+```{r}
+hotels %>% 
+  distinct(MarketSegment) %>% 
+  arrange(MarketSegment)
+
+hotels %>% 
+  distinct(hotel, MarketSegment) %>% 
+  arrange(hotel, MarketSegment)
+```
+
+###count() examples
+```{r}
+hotels %>% 
+  count(MarketSegment)
+
+hotels %>% 
+  count(MarketSegment, sort = TRUE) #sort based on the frequency count
+
+hotels %>% 
+  count(MarketSegment) %>% 
+  arrange(n)
+
+hotels %>% 
+  count(MarketSegment) %>% 
+  arrange(desc(n))
+
+hotels %>% 
+  count(hotel, MarketSegment)
+
+hotels %>% 
+  count(MarketSegment, hotel)
+```
+###mutate examples
+
+```{r}
+hotels %>% 
+  mutate(little_one = Children + Babies) %>% 
+  select(Children, Babies, little_one) %>% 
+  arrange(desc(little_one))
+
+hotels %>% 
+  mutate(little_one = Children + Babies) %>% 
+  filter(
+    little_one >= 1,
+    hotel == 'h1'
+  ) %>% 
+  select(hotel, little_one)
+
+hotels %>% 
+  mutate(little_one = Children + Babies) %>% 
+  count(hotel, little_one) %>% 
+  mutate(prop = n/sum(n))
+```
+###summarize examples
+
+```{r}
+hotels %>% 
+  group_by(hotel) %>% 
+  summarize(mean_adr = mean(ADR), 
+            min_adr = min(ADR),
+            n=n())
+
+hotels %>% 
+  count(hotel)
+```
+###rename examples newname = currentname
+
+```{r}
+hotels %>% 
+  rename(HotelType = hotel)
+```
+####select() can rename and reposition variables
+```{r}
+hotels %>% 
+  filter(hotel == "h1", IsCanceled == "0") %>% 
+  select(lt=LeadTime, ArrivalDateYear, ArrivalDateMonth) %>% 
+  select(ArrivalDateYear, everything())
+```
+```{r}
+library(gapminder)
+my_gap<-gapminder
+```
+
+#####Count
+```{r}
+my_gap %>% 
+  group_by(continent) %>% 
+  tally()
+```
+
+```{r}
+my_gap %>% 
+  group_by(continent) %>% 
+  summarize(n=n(),
+            n_countries = n_distinct(country))
+```
+#####summarize_at()
+```{r}
+my_gap %>% 
+  filter(year %in% c(1952, 2007)) %>% 
+  group_by(continent) %>% 
+  summarize_at(vars(lifeExp, gdpPercap), list(~mean(.), ~median(.)))
+```
+```{r}
+#first() function extracts the first value from a vector. Notice that first() is operating on the vector of life expectancies within each country group
+my_gap %>% 
+  group_by(country) %>% 
+  select(country, year, lifeExp) %>% 
+  mutate(lifeExp_gain = lifeExp - first(lifeExp)) %>% 
+  filter(year<1963)
+```
+
+#####window functions
+```{r}
+my_gap %>% 
+  filter(continent == "Asia") %>% 
+  select(year, country, lifeExp) %>% 
+  group_by(year) %>% 
+  filter(min_rank(desc(lifeExp))<2 | min_rank(lifeExp)<2) %>% 
+  arrange(year) %>% 
+  print(n=Inf)
+```
+```{r}
+my_gap %>% 
+  filter(continent == "Asia") %>% 
+  select(year, country, lifeExp) %>% 
+  group_by(year) %>% 
+  mutate(le_rank = min_rank(lifeExp),
+         le_desc_rank = min_rank(desc(lifeExp))) %>% 
+  filter(country %in% c("Afghanistan", "Japan", "Thailand"))
+```
+#####top_n()
+
+```{r}
+my_gap %>% 
+  filter(continent == "Asia") %>% 
+  select(year, country, lifeExp) %>% 
+  arrange(year) %>% 
+  group_by(year) %>% 
+  top_n(1, wt=lifeExp) #gets the min
+#top_n(1, wt=desc(lifeExp)) #gets the max
+```
+
+```{r}
+my_gap %>% 
+  select(country, year, continent, lifeExp) %>% 
+  group_by(continent, country) %>% 
+  mutate(le_delta=lifeExp - lag(lifeExp)) %>% 
+  summarize(worst_le_delta = min(le_delta, na.rm=TRUE)) %>% 
+  top_n(-1, wt = worst_le_delta) %>% #within continent, retain the row with the lowest worst_le_delta
+  arrange(worst_le_delta)
+```
+
+#Working with multiple data frames
+
+##join data frames
+something_join(x,y)
+left_join():all the rows from x
+right_join():all the rows from y
+full_join():all the rows from x and y
+semi_join():all the rows from x where there are matching values in y, keeping just columns from x
+inner_join():all the rows from x where there are matching values in ye, return all combination of multiple matches in the case of multiple matches
+anti_join():all the rows from x where there are no matching values in y, never deplicate rows of x
+
+```{r}
+profession %>% 
+  left_join(dates, by="id")
+```
+
+
+
