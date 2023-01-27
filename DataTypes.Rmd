@@ -1,0 +1,86 @@
+---
+title: "DataTypes"
+author: "YG"
+date: "2023-01-27"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# cat_lovers %>% 
+#   mutate(number_of_cats = case_when(
+#     name == "Ginger Clark" ~"2",
+#     name == "Doug Bass"    ~"3",
+#     TRUE                   ~number_of_cats
+#   ),
+#   number_of_cats = as.numeric(number_of_cats)) %>% 
+#   summarize(mean_cats = mean(number_of_cats))
+```
+
+#Data types
+1. logical
+2. Character
+3. Double: floating point numerical numbers
+4. Integer: typeof(7L)
+
+#Special values
+1. NA: not available
+2. NaN: not a number
+3. Inf: positive infinity
+4.-Inf: Negative infinity
+
+```{r}
+x<-c(1,2,3,4,NA)
+mean(x)
+mean(x, na.rm = TRUE)
+summary(x)
+
+TRUE|NA
+FALSE|NA
+```
+```{r}
+df %>% 
+  pull(y) #pull a vactor from a data frame
+```
+
+```{r}
+cat_lovers %>% 
+  mutate(handness=fct_infreq(handness)) %>% #order the bars by frequency count 
+  ggplot(aes(x=handness)) +
+  gemo_bar()
+```
+
+```{r}
+library(skimr)
+```
+```{r}
+hotels <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-11/hotels.csv", show_col_types = FALSE)
+```
+
+```{r}
+hotels$arrival_date_month <-factor(hotels$arrival_date_month,
+                                   levels = c("January", "Febrary", "March", "April", "May", "June", "July", "August",
+                                              "September", "October", "November", "December"))
+```
+
+```{r}
+hotels %>% 
+  group_by(hotel, arrival_date_month) %>% 
+  summarize(mean_adr=mean(adr)) %>% 
+  ggplot(aes(x=arrival_date_month,
+             y=mean_adr, 
+             group=hotel,
+             color=hotel)) +
+  geom_line() +
+  theme_minimal() +
+  labs(x="Arrival Month",
+       y="Mean ADR (average daily rate",
+       title = "Comparison of resort and city hotel prices across months",
+       subtitle = "Resort hotel prices soar in the summer while cith hotel prices remain relatively constant throughout the year",
+       color="Hotel type") +
+  scale_y_continuous(labels = label_dollar())
+```
+
