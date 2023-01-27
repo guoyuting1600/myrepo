@@ -1,21 +1,16 @@
+---
+title: "TidyDataLab"
+author: "YG"
+date: "2023-01-26"
+output: html_document
+---
+
+
 # Lab: Nobel laureates {#lab03}
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(eval = TRUE)
 ```
-
-In January 2017, Buzzfeed published an article on why Nobel laureates show immigration is so important for American science. You can read the article [here](https://www.buzzfeednews.com/article/peteraldhous/immigration-and-science). In the article, they show that while most living Nobel laureates in the sciences are based in the US, many of them were born in other countries. This reality is one reason why scientific leaders say that immigration is vital for progress. In this lab we will work with the data from this article to recreate some of their visualizations as well as explore new questions.
-
-## Learning goals {.unnumbered}
-
--   Replicating published results
--   Data wrangling and visualization
-
-## Lab prep {.unnumbered}
-
--   **Task:** Read the Buzzfeed article titled [*These Nobel Prize Winners Show Why Immigration Is So Important For American Science*](https://www.buzzfeednews.com/article/peteraldhous/immigration-and-science)*.* We will be replicating this analysis in the lab. So it's crucial that you're familiar with it ahead of time.
-
-
 
 ## Getting started {.unnumbered}
 
@@ -50,7 +45,7 @@ The dataset for this assignment can be found as a csv (comma separated values) f
 You can read it in using the following.
 
 ```{r load-data, message = FALSE}
-nobel <- read_csv("data/nobel.csv")
+nobel <- read_csv("nobel.csv")
 ```
 
 The variable descriptions are as follows:
@@ -92,8 +87,12 @@ In these cases the variables below reflect a different name than their counterpa
 ### Get to know your data {.unnumbered}
 
 1.  How many observations and how many variables are in the dataset? Use inline code to answer this question. What does each row represent?
-
 There are some observations in this dataset that we will exclude from our analysis to match the Buzzfeed results.
+
+```{r}
+str(nobel)
+```
+
 
 2.  Create a new data frame called `nobel_living` that filters for
 
@@ -112,7 +111,6 @@ nobel_living <- nobel %>%
 
 Confirm that once you have filtered for these characteristics you are left with a data frame with `r nrow(nobel_living)` observations, once again using inline code.
 
-🧶 ✅ ⬆️ Knit, *commit, and push your changes to GitHub with an appropriate commit message. Make sure to commit and push all changed files so that your Git pane is cleared up afterwards.*
 
 ### Most living Nobel laureates were based in the US when they won their prizes {.unnumbered}
 
@@ -156,39 +154,53 @@ You'll need to define this data frame in your R Markdown document, even though t
     -   Your visualization should be faceted by category.
     -   For each facet you should have two bars, one for winners in the US and one for Other.
     -   Flip the coordinates so the bars are horizontal, not vertical.
-
-🧶 ✅ ⬆️ Knit, *commit, and push your changes to GitHub with an appropriate commit message. Make sure to commit and push all changed files so that your Git pane is cleared up afterwards.*
+    
+```{r}
+ggplot(nobel_living_science, aes(x=country_us, fill = country_us)) +
+  geom_bar() +
+  facet_wrap(~category) +
+  coord_flip() +
+  labs(x="Country recieve the nobel prize ")
+```
 
 ## But of those US-based Nobel laureates, many were born in other countries {.unnumbered}
 
-
-> **Hint:** You should be able to ~~cheat~~ borrow from code you used earlier to create the `country_us` variable.
-
-
 4.  Create a new variable called `born_country_us` that has the value `"USA"` if the laureate is born in the US, and `"Other"` otherwise.
     How many of the winners are born in the US?
+    ```{r}
+nobel %>% 
+  mutate(born_us = if_else(born_country == "USA", "USA", "Other")) %>% 
+  count(born_us)
+```
 
 5.  Add a second variable to your visualization from Exercise 3 based on whether the laureate was born in the US or not.
     Based on your visualization, do the data appear to support Buzzfeed's claim?
     Explain your reasoning in 1-2 sentences.
-
+    
     -   Your final visualization should contain a facet for each category.
     -   Within each facet, there should be a bar for whether the laureate won the award in the US or not.
     -   Each bar should have segments for whether the laureate was born in the US or not.
-
-🧶 ✅ ⬆️ Knit, *commit, and push your changes to GitHub with an appropriate commit message. Make sure to commit and push all changed files so that your Git pane is cleared up afterwards.*
-
-### Here's where those immigrant Nobelists were born {.unnumbered}
-
-
-> Note: Your bar plot won't exactly match the one from the Buzzfeed article. This is likely because the data has been updated since the article was published.
-
-
+    
+```{r}
+n2<- nobel_living_science %>% 
+  mutate(born_us=ifelse(born_country=="USA", "USA", "Other"))
+```
+```{r}
+ggplot(n2, aes(x=country_us, fill=born_us)) +
+  geom_bar() +
+  facet_wrap(~category) +
+  coord_flip() +
+  labs(x="country receive the nobel prize", fill = "born country")
+```
 6.  In a single pipeline, filter for laureates who won their prize in the US, but were born outside of the US, and then create a frequency table (with the `count()` function) for their birth country (`born_country`) and arrange the resulting data frame in descending order of number of observations for each country. Which country is the most common?
 
-🧶 ✅ ⬆️ Knit, *commit, and push your changes to GitHub with an appropriate commit message. Make sure to commit and push all changed files so that your Git pane is cleared up afterwards and review the md document on GitHub to make sure you're happy with the final state of your work.*
-
-Now go back through your write up to make sure you've answered all questions and all of your R chunks are properly labeled.
+```{r}
+nobel %>% 
+  filter(country=="USA",
+         born_country != "USA") %>% 
+  count(born_country) %>% 
+  arrange(desc(n))
+```
 
 
 ## Interested in how Buzzfeed made their visualizations? {.unnumbered}
