@@ -42,18 +42,19 @@ TRUE|NA
 FALSE|NA
 ```
 ```{r}
-df %>% 
-  pull(y) #pull a vactor from a data frame
+# df %>% 
+#   pull(y) #pull a vactor from a data frame
 ```
 
 ```{r}
-cat_lovers %>% 
-  mutate(handness=fct_infreq(handness)) %>% #order the bars by frequency count 
-  ggplot(aes(x=handness)) +
-  gemo_bar()
+# cat_lovers %>% 
+#   mutate(handness=fct_infreq(handness)) %>% #order the bars by frequency count 
+#   ggplot(aes(x=handness)) +
+#   geom_bar()
 ```
 
 ```{r}
+library(tidyverse)
 library(skimr)
 ```
 ```{r}
@@ -67,6 +68,8 @@ hotels$arrival_date_month <-factor(hotels$arrival_date_month,
 ```
 
 ```{r}
+library(scales)
+
 hotels %>% 
   group_by(hotel, arrival_date_month) %>% 
   summarize(mean_adr=mean(adr)) %>% 
