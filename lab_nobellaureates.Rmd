@@ -167,7 +167,7 @@ ggplot(nobel_living_science, aes(x=country_us, fill = country_us)) +
 
 4.  Create a new variable called `born_country_us` that has the value `"USA"` if the laureate is born in the US, and `"Other"` otherwise.
     How many of the winners are born in the US?
-    ```{r}
+```{r}
 nobel %>% 
   mutate(born_us = if_else(born_country == "USA", "USA", "Other")) %>% 
   count(born_us)
