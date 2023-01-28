@@ -63,11 +63,11 @@ hotels <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesda
 
 ```{r}
 hotels$arrival_date_month <-factor(hotels$arrival_date_month,
-                                   levels = c("January", "Febrary", "March", "April", "May", "June", "July", "August",
+                                   levels = c("January", "February", "March", "April", "May", "June", "July", "August",
                                               "September", "October", "November", "December"))
 ```
 
-```{r}
+```{r fig.height=4.5, fig.width=10}
 library(scales)
 
 hotels %>% 
@@ -85,5 +85,14 @@ hotels %>%
        subtitle = "Resort hotel prices soar in the summer while cith hotel prices remain relatively constant throughout the year",
        color="Hotel type") +
   scale_y_continuous(labels = label_dollar())
+```
+#Working with dates
+```{r}
+library(lubridate)
+```
+
+```{r}
+hotels %>% 
+  filter(is.na(arrival_date_month))
 ```
 
