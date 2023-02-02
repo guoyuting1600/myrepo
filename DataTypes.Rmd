@@ -208,4 +208,75 @@ f<- read_rds("DS4P.rds")
 summary(f)
 ```
 
+read many files
+```{r}
+#locate the files under a directory
+#sales_file<- fs::dir_ls("data/sales")
+#sales_file
+```
+
+```{r}
+library(vroom)
+#combine all the files
+sales <- vroom::vroom(sales_files, id = "filename")
+sales
+```
+
+More about writing and reading files
+```{r}
+library(fs)
+gap_tsv<-path_package("gapminder", "extdata", "gapminder.tsv")
+gapminder<- read_tsv(gap_tsv)
+str(gapminder, give.attr = FALSE)
+```
+change character to factor
+```{r}
+gapminder<- gapminder %>% 
+  mutate(country = factor(country),
+         continent = factor(continent))
+str(gapminder)
+```
+export file
+```{r}
+gap_life_exp <- gapminder %>% 
+  group_by(country, continent) %>% 
+  summarize(life_exp = max(lifeExp)) %>% 
+  ungroup()
+
+write_csv(gap_life_exp, "gap_life_exp.csv")
+```
+
+order levels based on numerical values
+```{r}
+head(levels(gap_life_exp$country)) #alphabetic order
+
+gap_life_exp <- gap_life_exp %>% 
+  mutate(country = fct_reorder(country, life_exp))
+
+head(levels(gap_life_exp$country))
+```
+Box-Cox transformation
+```{r}
+library(faraway)
+data(butterfat)
+```
+
+```{r}
+fullmodel = lm(Butterfat ~ Breed * Age, data = butterfat)
+plot(fullmodel)
+```
+```{r}
+library(MASS)
+bc = boxcox(fullmodel, lambda = seq(-3,3))
+
+#extract best lambda
+best.lam = bc$x[which(bc$y == max(bc$y))]
+
+```
+```{r}
+#boxcox says to transform the data using inverse
+
+fullmodel.inv = lm((Butterfat)^-1 ~ Breed * Age, data = butterfat)
+plot(fullmodel.inv)
+```
 
