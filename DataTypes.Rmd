@@ -67,6 +67,13 @@ hotels$arrival_date_month <-factor(hotels$arrival_date_month,
                                               "September", "October", "November", "December"))
 ```
 
+
+```{r}
+hotels %>% 
+  filter(is.na(arrival_date_month))
+```
+
+
 ```{r fig.height=4.5, fig.width=10}
 library(scales)
 
@@ -93,6 +100,112 @@ library(lubridate)
 
 ```{r}
 hotels %>% 
-  filter(is.na(arrival_date_month))
+  select(starts_with("arrival_"))
 ```
+```{r}
+library(glue)
+
+hotels %>% 
+  mutate(
+    arrival_date = glue("{arrival_date_year} {arrival_date_month} {arrival_date_day_of_month}")
+  ) %>% 
+  select(starts_with("arrival_"))
+  
+```
+
+```{r}
+hotels %>% 
+  mutate(
+    arrival_date = glue("{arrival_date_year} {arrival_date_month} {arrival_date_day_of_month}")
+  ) %>% 
+  count(arrival_date) %>% 
+  ggplot(aes(x=arrival_date, y=n, group=1)) +
+  geom_line() +
+  theme_bw()
+```
+```{r}
+hotels %>% 
+  mutate(
+    arrival_date = ymd(glue("{arrival_date_year} {arrival_date_month} {arrival_date_day_of_month}"))
+  ) %>% 
+  count(arrival_date) %>% 
+  ggplot(aes(x=arrival_date, y=n, group=1)) +
+  geom_line() +
+  theme_bw()
+```
+
+```{r}
+hotels %>% 
+  mutate(
+    arrival_date = ymd(glue("{arrival_date_year} {arrival_date_month} {arrival_date_day_of_month}"))
+  ) %>% 
+  count(arrival_date) %>% 
+  ggplot(aes(x=arrival_date, y=n, group=1)) +
+ # geom_line() +
+  geom_smooth() +
+  theme_bw()
+```
+Importing files
+
+Packages:(readr) (readxl)
+Functions
+read_csv()-comma delimited
+read_csv2()-semicolon separated files
+read_tsv()-tab separated files
+read_delim()-reads in files with any delimiter
+read_fwf()-fixed width files
+read_table()-common variation of fixed width files where columns are separated by white space
+
+```{r}
+df <- tribble(
+  ~x, ~y,
+  1, "q",
+  2, "b",
+  3, "c"
+)
+
+write_csv(df,file = "df.csv")
+```
+
+```{r}
+fs::dir_ls()
+```
+```{r}
+# edi_airbnb <- read_csv("data/edi-airbnb.csv")
+# names(edi_airbnb)
+```
+
+Remove spaces from column names
+
+Option 1. Define column names
+```{r}
+# edi_airbnb_col_names <- read_csv("data/edi-airbnb.csv",
+#                                  col_names = c("id", "price", "neighbourhood", "accommodates",
+#                                                "bathroom", "bedroom", "bed", 
+#                                                "review_scores_rating", "n_reviews", "url"))
+# names(edi_airbnb)
+```
+
+Option 2. Format text to snake_case
+```{r}
+# edi_airbnb_cleaned_names <- edi_airbnb %>% 
+#   janitor::clean_names()
+# 
+# names(edi_airbnb_cleaned_names) #change to lower case, replace space with underscore
+```
+
+NA
+```{r}
+#read_csv("df-na.csv", na=c(" ", "NA", ".", "9999", "Not applicable"))
+
+#read_csv("df-na.csv",
+#col_types = list(col_double, col_character(), col_character()))
+```
+
+read rds
+```{r}
+f<- read_rds("DS4P.rds")
+summary(f)
+```
+
 
