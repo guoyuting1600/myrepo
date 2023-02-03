@@ -22,6 +22,273 @@ knitr::opts_chunk$set(echo = TRUE)
 5. use meaningful and nonredundant labels
 
 ```{r}
+library(tidyverse)
+bx <- read_csv("brexit.csv")
+```
+1. order matters
+```{r}
+ggplot(bx, aes(x = opinion)) +
+  geom_bar()
+```
 
+fct_infreq():reorder factors' levels by frequency
+```{r}
+ggplot(bx, aes(x=fct_infreq(opinion))) +
+  geom_bar() +
+  labs(
+    x="opinion",
+    y="count"
+  ) #clean up labels
+```
+alphabetical order is rarely ideal
+```{r}
+ggplot(bx, aes(x=region)) +
+  geom_bar()
+```
+fct_relevel:reorder factor levels using a custom order
+```{r}
+bx <- bx %>% 
+  mutate(
+    region = fct_relevel(
+      region,
+      "london", "rest_of_south", "midlands_wales", "north", "scot"
+    )
+  )
+```
+
+```{r}
+ggplot(bx, aes(x=region)) +
+  geom_bar()
+```
+
+fct_recode:change factor level names by hand
+```{r}
+bx <- bx %>% 
+  mutate(
+    region = fct_recode(
+      region,
+      'London' = "london",
+      'Rest of South' = "rest_of_south",
+      'Midlands / Wales' = "midlands_wales",
+      'North' = "north",
+      'Scotland' = "scot"
+    )
+  )
+```
+
+```{r}
+ggplot(bx, aes(x=region)) +
+  geom_bar()
+```
+2. put long categories on the y-axis
+```{r}
+ggplot(bx, aes(x=region)) +
+  geom_bar() +
+  coord_flip()
+
+ggplot(bx, aes(y=region)) +
+  geom_bar() 
+```
+fct_rev:reverse order of factor levels
+```{r}
+ggplot(bx, aes(y=fct_rev(region))) +
+  geom_bar() +
+  labs(x = "Count",
+       y = "Region")
+```
+```{r}
+ggplot(bx, aes(y=region, fill=opinion)) +
+  geom_bar()
+```
+```{r}
+ggplot(bx, aes(y=opinion, fill=region)) +
+  geom_bar() +
+  facet_wrap(~region, nrow = 1)
+```
+```{r}
+ggplot(bx, aes(y=opinion, fill=opinion)) +
+  geom_bar() +
+  facet_wrap(~region, nrow = 1) +
+  guides(fill=FALSE) +
+  labs(
+    title = "Was Britain right/wrong to vote exit EU?",
+    subtitle = "YouGov Survey Results, 2-3 September 2019",
+    caption = "Source:https://d25d2506sfb94s.cloudfront.net/cumulus_uploads/document/x0msmggx08/YouGov%20-%20Brexit%20and%202019%20election.pdf",
+    x = NULL,
+    y = NULL
+  )
+```
+```{r}
+ggplot(bx, aes(y=opinion, fill=opinion)) +
+  geom_bar() +
+  facet_wrap(~region, nrow = 1) +
+  facet_wrap(~region,
+             nrow = 1,
+             labeller = label_wrap_gen(width = 12)) +
+  guides(fill=FALSE) +
+  labs(
+    title = "Was Britain right/wrong to vote exit EU?",
+    subtitle = "YouGov Survey Results, 2-3 September 2019",
+    caption = "Source: bit.ly/2lCJZVg",
+    x = NULL,
+    y = NULL
+  )
+```
+4. select meaningful colors
+```{r}
+ggplot(bx, aes(y=region, fill=opinion)) +
+  geom_bar(position="fill")
+  
+```
+Choose color manually
+```{r}
+ggplot(bx, aes(y=opinion, fill=opinion)) +
+  geom_bar() +
+  facet_wrap(~region, nrow = 1) +
+  facet_wrap(~region,
+             nrow = 1,
+             labeller = label_wrap_gen(width = 12)) +
+  guides(fill=FALSE) +
+  labs(
+    title = "Was Britain right/wrong to vote exit EU?",
+    subtitle = "YouGov Survey Results, 2-3 September 2019",
+    caption = "Source: bit.ly/2lCJZVg",
+    x = NULL,
+    y = NULL
+  ) +
+  scale_fill_manual(values = c(
+    "Wrong" = "red",
+    "Right" = "green",
+    "Don't know" = "grey"
+  ))
+```
+colorbrewer2
+```{r}
+ggplot(bx, aes(y=opinion, fill=opinion)) +
+  geom_bar() +
+  facet_wrap(~region, nrow = 1) +
+  facet_wrap(~region,
+             nrow = 1,
+             labeller = label_wrap_gen(width = 12)) +
+  guides(fill=FALSE) +
+  labs(
+    title = "Was Britain right/wrong to vote exit EU?",
+    subtitle = "YouGov Survey Results, 2-3 September 2019",
+    caption = "Source: bit.ly/2lCJZVg",
+    x = NULL,
+    y = NULL
+  ) +
+  scale_fill_manual(values = c(
+    "Wrong" = "#ef8a62",
+    "Right" = "#67a9cf",
+    "Don't know" = "gray"
+  )) +
+  theme_minimal()
+```
+Viridis scale works well with ordinal data
+```{r}
+ggplot(bx, aes(y=region, fill=opinion)) +
+  geom_bar(position = "fill") +
+  scale_fill_viridis_d()
+```
+```{r}
+barplot <- ggplot(diamonds, aes(x="", fill=clarity)) +
+  geom_bar(width = 1, position = "stack")
+barplot
+```
+```{r}
+barplot + coord_polar()
+```
+```{r}
+barplot + coord_polar(theta = "y")
+```
+```{r}
+barplot <- ggplot(diamonds, aes(x="", fill=clarity)) +
+  geom_bar(width = 1, position = "dodge")
+barplot
+```
+Components of a plot
+1. a default data set and set of mappings from variables to aesthetics
+2. one or more layers
+-one geommetric object (geom_)
+-one statistical transformation (stat_)
+-one position adjustment(position_)
+3. one dataset and set of aesthetic mappings
+4. a coordinate system(coord_*)
+5. a facet sepecification(facet_*)
+
+```{r}
+md <- read_csv("minard.csv")
+md_city <- read_csv("minard-cities.csv")
+md_temp <- read_csv("minard-temps.csv")
+```
+
+```{r}
+plot_troops <- ggplot(md) +
+  geom_path(aes(x=long,
+                y=lat,
+                color=direction,
+                linewidth=surviv,
+                group=division))
+plot_troops
+```
+```{r}
+plot_both <- plot_troops +
+  geom_text(data=md_city, 
+            aes(x=long,
+                y=lat,
+                label=city),
+            size=3)
+plot_both
+```
+```{r}
+library(ggrepel)
+plot_all <- plot_both +
+  geom_text_repel(data = md_temp, 
+            aes(x=long,
+                y=lat,
+                label=temp),
+            size=3.5,
+            color="#67a9cf"
+            )
+plot_all
+```
+
+```{r}
+ggplot(md) +
+  geom_path(aes(x = long,
+                y = lat,
+                color = direction,
+                size = surviv^2,
+                group = division),
+            lineend = "round") +
+  geom_text(aes(x = long,
+                y = lat,
+                label = city),
+            data = md_city,
+            size = 3) +
+  geom_text_repel(aes(x = long,
+                      y = lat,
+                      label = temp),
+                  data = md_temp,
+                  size = 3,
+                  color="#67a9cf"
+                  ) +
+  scale_size(range = c(.18,15),
+             breaks = (1:3*10^5)^2,
+             labels = 
+               scales :: comma(1:3*10^5),
+             "Survivors") +
+  scale_color_manual(values = c("red",
+                                "grey50"), 
+                       breaks = c("A",
+                                  "R"), 
+                       labels = c("Advance",
+                                  "Retreat"),
+                       "") +
+    xlab(NULL) + ylab(NULL) +
+    theme(axis.text = element_blank(), 
+          axis.ticks = element_blank(), 
+          panel.grid = element_blank())
 ```
 
