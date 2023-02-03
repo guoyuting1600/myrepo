@@ -1,0 +1,27 @@
+---
+title: "M4_design_effective_visualizations"
+author: "YG"
+date: "2023-02-03"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Tips for effective visulization
+1. keep it simple
+2. use color to draw attention
+3. tell a story
+
+#Principles for effective visulization
+1. order matters
+2. put long categories on the y-axis
+3. keep scales consistent
+4. select meaningful colors
+5. use meaningful and nonredundant labels
+
+```{r}
+
+```
+
